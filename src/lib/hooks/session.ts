@@ -1,9 +1,10 @@
 /* eslint-disable */
-import type { Prisma, Session } from ".zenstack/models";
+import type { Prisma, Session } from "@zenstackhq/runtime/models";
 import type { UseMutationOptions, UseQueryOptions, UseInfiniteQueryOptions, InfiniteData } from '@tanstack/react-query';
 import { getHooksContext } from '@zenstackhq/tanstack-query/runtime-v5/react';
 import { useModelQuery, useInfiniteModelQuery, useModelMutation } from '@zenstackhq/tanstack-query/runtime-v5/react';
 import type { PickEnumerable, CheckSelect, QueryError, ExtraQueryOptions, ExtraMutationOptions } from '@zenstackhq/tanstack-query/runtime-v5';
+import type { PolicyCrudKind } from '@zenstackhq/runtime'
 import metadata from './__model_meta';
 type DefaultError = QueryError;
 import { useSuspenseModelQuery, useSuspenseInfiniteModelQuery } from '@zenstackhq/tanstack-query/runtime-v5/react';
@@ -29,13 +30,33 @@ export function useCreateSession(options?: Omit<(UseMutationOptions<(Session | u
     return mutation;
 }
 
+export function useCreateManySession(options?: Omit<(UseMutationOptions<Prisma.BatchPayload, DefaultError, Prisma.SessionCreateManyArgs> & ExtraMutationOptions), 'mutationFn'>) {
+    const { endpoint, fetch } = getHooksContext();
+    const _mutation =
+        useModelMutation<Prisma.SessionCreateManyArgs, DefaultError, Prisma.BatchPayload, false>('Session', 'POST', `${endpoint}/session/createMany`, metadata, options, fetch, false)
+        ;
+    const mutation = {
+        ..._mutation,
+        mutateAsync: async <T extends Prisma.SessionCreateManyArgs>(
+            args: Prisma.SelectSubset<T, Prisma.SessionCreateManyArgs>,
+            options?: Omit<(UseMutationOptions<Prisma.BatchPayload, DefaultError, Prisma.SelectSubset<T, Prisma.SessionCreateManyArgs>> & ExtraMutationOptions), 'mutationFn'>
+        ) => {
+            return (await _mutation.mutateAsync(
+                args,
+                options as any
+            )) as Prisma.BatchPayload;
+        },
+    };
+    return mutation;
+}
+
 export function useFindManySession<TArgs extends Prisma.SessionFindManyArgs, TQueryFnData = Array<Prisma.SessionGetPayload<TArgs> & { $optimistic?: boolean }>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionFindManyArgs>, options?: (Omit<UseQueryOptions<TQueryFnData, TError, TData>, 'queryKey'> & ExtraQueryOptions)) {
     const { endpoint, fetch } = getHooksContext();
     return useModelQuery<TQueryFnData, TData, TError>('Session', `${endpoint}/session/findMany`, args, options, fetch);
 }
 
-export function useInfiniteFindManySession<TArgs extends Prisma.SessionFindManyArgs, TQueryFnData = Array<Prisma.SessionGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionFindManyArgs>, options?: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey'>) {
-    options = options ?? { initialPageParam: undefined, getNextPageParam: () => null };
+export function useInfiniteFindManySession<TArgs extends Prisma.SessionFindManyArgs, TQueryFnData = Array<Prisma.SessionGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionFindManyArgs>, options?: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey' | 'initialPageParam'>) {
+    options = options ?? { getNextPageParam: () => null };
     const { endpoint, fetch } = getHooksContext();
     return useInfiniteModelQuery<TQueryFnData, TData, TError>('Session', `${endpoint}/session/findMany`, args, options, fetch);
 }
@@ -45,8 +66,8 @@ export function useSuspenseFindManySession<TArgs extends Prisma.SessionFindManyA
     return useSuspenseModelQuery<TQueryFnData, TData, TError>('Session', `${endpoint}/session/findMany`, args, options, fetch);
 }
 
-export function useSuspenseInfiniteFindManySession<TArgs extends Prisma.SessionFindManyArgs, TQueryFnData = Array<Prisma.SessionGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionFindManyArgs>, options?: Omit<UseSuspenseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey'>) {
-    options = options ?? { initialPageParam: undefined, getNextPageParam: () => null };
+export function useSuspenseInfiniteFindManySession<TArgs extends Prisma.SessionFindManyArgs, TQueryFnData = Array<Prisma.SessionGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionFindManyArgs>, options?: Omit<UseSuspenseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey' | 'initialPageParam'>) {
+    options = options ?? { getNextPageParam: () => null };
     const { endpoint, fetch } = getHooksContext();
     return useSuspenseInfiniteModelQuery<TQueryFnData, TData, TError>('Session', `${endpoint}/session/findMany`, args, options, fetch);
 }
@@ -299,4 +320,9 @@ export function useCountSession<TArgs extends Prisma.SessionCountArgs, TQueryFnD
 export function useSuspenseCountSession<TArgs extends Prisma.SessionCountArgs, TQueryFnData = TArgs extends { select: any; } ? TArgs['select'] extends true ? number : Prisma.GetScalarType<TArgs['select'], Prisma.SessionCountAggregateOutputType> : number, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.SessionCountArgs>, options?: (Omit<UseSuspenseQueryOptions<TQueryFnData, TError, TData>, 'queryKey'> & ExtraQueryOptions)) {
     const { endpoint, fetch } = getHooksContext();
     return useSuspenseModelQuery<TQueryFnData, TData, TError>('Session', `${endpoint}/session/count`, args, options, fetch);
+}
+
+export function useCheckSession<TError = DefaultError>(args: { operation: PolicyCrudKind; where?: { id?: string; sessionToken?: string; userId?: string }; }, options?: (Omit<UseQueryOptions<boolean, TError, boolean>, 'queryKey'> & ExtraQueryOptions)) {
+    const { endpoint, fetch } = getHooksContext();
+    return useModelQuery<boolean, boolean, TError>('Session', `${endpoint}/session/check`, args, options, fetch);
 }

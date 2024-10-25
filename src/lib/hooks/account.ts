@@ -1,9 +1,10 @@
 /* eslint-disable */
-import type { Prisma, Account } from ".zenstack/models";
+import type { Prisma, Account } from "@zenstackhq/runtime/models";
 import type { UseMutationOptions, UseQueryOptions, UseInfiniteQueryOptions, InfiniteData } from '@tanstack/react-query';
 import { getHooksContext } from '@zenstackhq/tanstack-query/runtime-v5/react';
 import { useModelQuery, useInfiniteModelQuery, useModelMutation } from '@zenstackhq/tanstack-query/runtime-v5/react';
 import type { PickEnumerable, CheckSelect, QueryError, ExtraQueryOptions, ExtraMutationOptions } from '@zenstackhq/tanstack-query/runtime-v5';
+import type { PolicyCrudKind } from '@zenstackhq/runtime'
 import metadata from './__model_meta';
 type DefaultError = QueryError;
 import { useSuspenseModelQuery, useSuspenseInfiniteModelQuery } from '@zenstackhq/tanstack-query/runtime-v5/react';
@@ -29,13 +30,33 @@ export function useCreateAccount(options?: Omit<(UseMutationOptions<(Account | u
     return mutation;
 }
 
+export function useCreateManyAccount(options?: Omit<(UseMutationOptions<Prisma.BatchPayload, DefaultError, Prisma.AccountCreateManyArgs> & ExtraMutationOptions), 'mutationFn'>) {
+    const { endpoint, fetch } = getHooksContext();
+    const _mutation =
+        useModelMutation<Prisma.AccountCreateManyArgs, DefaultError, Prisma.BatchPayload, false>('Account', 'POST', `${endpoint}/account/createMany`, metadata, options, fetch, false)
+        ;
+    const mutation = {
+        ..._mutation,
+        mutateAsync: async <T extends Prisma.AccountCreateManyArgs>(
+            args: Prisma.SelectSubset<T, Prisma.AccountCreateManyArgs>,
+            options?: Omit<(UseMutationOptions<Prisma.BatchPayload, DefaultError, Prisma.SelectSubset<T, Prisma.AccountCreateManyArgs>> & ExtraMutationOptions), 'mutationFn'>
+        ) => {
+            return (await _mutation.mutateAsync(
+                args,
+                options as any
+            )) as Prisma.BatchPayload;
+        },
+    };
+    return mutation;
+}
+
 export function useFindManyAccount<TArgs extends Prisma.AccountFindManyArgs, TQueryFnData = Array<Prisma.AccountGetPayload<TArgs> & { $optimistic?: boolean }>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountFindManyArgs>, options?: (Omit<UseQueryOptions<TQueryFnData, TError, TData>, 'queryKey'> & ExtraQueryOptions)) {
     const { endpoint, fetch } = getHooksContext();
     return useModelQuery<TQueryFnData, TData, TError>('Account', `${endpoint}/account/findMany`, args, options, fetch);
 }
 
-export function useInfiniteFindManyAccount<TArgs extends Prisma.AccountFindManyArgs, TQueryFnData = Array<Prisma.AccountGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountFindManyArgs>, options?: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey'>) {
-    options = options ?? { initialPageParam: undefined, getNextPageParam: () => null };
+export function useInfiniteFindManyAccount<TArgs extends Prisma.AccountFindManyArgs, TQueryFnData = Array<Prisma.AccountGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountFindManyArgs>, options?: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey' | 'initialPageParam'>) {
+    options = options ?? { getNextPageParam: () => null };
     const { endpoint, fetch } = getHooksContext();
     return useInfiniteModelQuery<TQueryFnData, TData, TError>('Account', `${endpoint}/account/findMany`, args, options, fetch);
 }
@@ -45,8 +66,8 @@ export function useSuspenseFindManyAccount<TArgs extends Prisma.AccountFindManyA
     return useSuspenseModelQuery<TQueryFnData, TData, TError>('Account', `${endpoint}/account/findMany`, args, options, fetch);
 }
 
-export function useSuspenseInfiniteFindManyAccount<TArgs extends Prisma.AccountFindManyArgs, TQueryFnData = Array<Prisma.AccountGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountFindManyArgs>, options?: Omit<UseSuspenseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey'>) {
-    options = options ?? { initialPageParam: undefined, getNextPageParam: () => null };
+export function useSuspenseInfiniteFindManyAccount<TArgs extends Prisma.AccountFindManyArgs, TQueryFnData = Array<Prisma.AccountGetPayload<TArgs>>, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountFindManyArgs>, options?: Omit<UseSuspenseInfiniteQueryOptions<TQueryFnData, TError, InfiniteData<TData>>, 'queryKey' | 'initialPageParam'>) {
+    options = options ?? { getNextPageParam: () => null };
     const { endpoint, fetch } = getHooksContext();
     return useSuspenseInfiniteModelQuery<TQueryFnData, TData, TError>('Account', `${endpoint}/account/findMany`, args, options, fetch);
 }
@@ -299,4 +320,9 @@ export function useCountAccount<TArgs extends Prisma.AccountCountArgs, TQueryFnD
 export function useSuspenseCountAccount<TArgs extends Prisma.AccountCountArgs, TQueryFnData = TArgs extends { select: any; } ? TArgs['select'] extends true ? number : Prisma.GetScalarType<TArgs['select'], Prisma.AccountCountAggregateOutputType> : number, TData = TQueryFnData, TError = DefaultError>(args?: Prisma.SelectSubset<TArgs, Prisma.AccountCountArgs>, options?: (Omit<UseSuspenseQueryOptions<TQueryFnData, TError, TData>, 'queryKey'> & ExtraQueryOptions)) {
     const { endpoint, fetch } = getHooksContext();
     return useSuspenseModelQuery<TQueryFnData, TData, TError>('Account', `${endpoint}/account/count`, args, options, fetch);
+}
+
+export function useCheckAccount<TError = DefaultError>(args: { operation: PolicyCrudKind; where?: { id?: string; userId?: string; type?: string; provider?: string; providerAccountId?: string; refresh_token?: string; access_token?: string; expires_at?: number; token_type?: string; scope?: string; id_token?: string; session_state?: string }; }, options?: (Omit<UseQueryOptions<boolean, TError, boolean>, 'queryKey'> & ExtraQueryOptions)) {
+    const { endpoint, fetch } = getHooksContext();
+    return useModelQuery<boolean, boolean, TError>('Account', `${endpoint}/account/check`, args, options, fetch);
 }
