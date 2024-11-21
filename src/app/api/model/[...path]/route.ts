@@ -5,8 +5,7 @@ import { db } from "~/server/db";
 
 // create an enhanced Prisma client with user context
 async function getPrisma() {
-  const session = await getServerAuthSession();
-  return enhance(db, { user: session?.user });
+  return enhance(db, { user: { id: "test" } });
 }
 
 const handler = NextRequestHandler({ getPrisma, useAppDir: true });
